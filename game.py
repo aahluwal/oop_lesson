@@ -47,24 +47,46 @@ class Character(GameElement):
 
         return direction == None 
 
+    def move(self, x, y):
+        GAME_BOARD.del_el(self.x, self.y)
+        GAME_BOARD.set_el( x, y, self)
+      
+
+class Enemy(Character):
+  IMAGE = "Boy"
 
 class Gem(GameElement):
-    IMAGE = "BlueGem"
     SOLID = False
 
+class BlueGem(Gem):
+    IMAGE = "BlueGem"
     def interact(self, player):
-        
-        if self.IMAGE == "BlueGem":
-            player.inventory.append(self)
-            GAME_BOARD.draw_msg("You have acquired a gem! \
+        player.inventory.append(self)
+        GAME_BOARD.draw_msg("You have acquired a gem! \
                                     You have %d items in your inventory" %(len(player.inventory)))
-
-        elif self.IMAGE == "OrangeGem":
-            GAME_BOARD.del_el(player.x, player.y)
-            GAME_BOARD.set_el(3, 3, player)
-
 class OrangeGem(Gem):
-    IMAGE = "OrangeGem"
+    IMAGE = "OrangeGem":
+    def interact(self, player):
+        player.inventory.append(self)
+        GAME_BOARD.draw_msg("You have a key to one of the doors. Find the door out and you're safe!")
+        player.move(3, 3)
+class Door(GameElement):
+    IMAGE = "DoorClosed"
+    SOLID = True
+      
+    def initialize(self, key=None):
+      self.key = key
+
+    def interact(self, player):
+        has_key = False
+        for item in player.inventory:
+            if item == self.key:
+              has_key = True
+
+        if has_key:
+          self.IMAGE = "DoorOpened"
+          SOLID = False
+                
 
 class Tree(GameElement):
     IMAGE = "TallTree"
@@ -103,10 +125,24 @@ def initialize():
     GAME_BOARD.set_el(3, 3, PLAYER)
     print PLAYER
 
+    # Initialize and register two enemy boys that will attack character
+    global PLAYER1
+    PLAYER1 = Enemy()
+    GAME_BOARD.register(PLAYER1)
+    GAME_BOARD.set_el(1, 1, PLAYER1)
+    
+    print PLAYER1
+
+    global PLAYER2
+    PLAYER2 = Enemy()
+    GAME_BOARD.register(PLAYER2)
+    GAME_BOARD.set_el(4, 6, PLAYER2)
+    print PLAYER2 
+
     GAME_BOARD.draw_msg("This is Alyssa and Dee's wicked awesome game.")
 
     # Initialize and register the Gem
-    gem = Gem()
+    gem = BlueGem()
     GAME_BOARD.register(gem)
     GAME_BOARD.set_el(3, 1, gem)
 
@@ -123,6 +159,18 @@ def initialize():
     ]
 
     trees = []
+
+    door = Door(key=orange_gem)
+    GAME_BOARD.register(door)
+    GAME_BOARD.set_el(0, 0, door)
+    
+    door1 = Door()
+    GAME_BOARD.register(door1)
+    GAME_BOARD.set_el(3, 3, door1)
+
+    door2 = Door()
+    GAME_BOARD.register(door2)
+    GAME_BOARD.set_el(5, 5, door2)
 
     # Initialize and register a couple of trees
     for pos in tree_positions:
@@ -147,16 +195,33 @@ def keyboard_handler():
     elif KEYBOARD[key.LEFT]:
         direction = 'left'
 
+  
     if direction:
+        next_enemy_location = PLAYER1.next_pos(direction)
+        next_enemy_x = next_enemy_location[0]
+        next_enemy_y = next_enemy_location[1]
+        PLAYER1.move(next_enemy_x, next_enemy_y)
+
         next_location = PLAYER.next_pos(direction)
         next_x = next_location[0]
         next_y = next_location[1]
 
-        existing_el = GAME_BOARD.get_el(next_x, next_y)
+        is_out_of_bounds_x = False
+        if next_x == GAME_WIDTH or next_x == -1:
+            is_out_of_bounds_x = True
+        
+        is_out_of_bounds_y = False
+        if next_y == GAME_HEIGHT or next_y == -1:
+            is_out_of_bounds_y = True
 
-        if existing_el is None or not existing_el.SOLID:
+    
+
+
+        existing_el = GAME_BOARD.get_el(next_x, next_y)
+       if existing_el is None or not existing_el.SOLID:
             GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
             GAME_BOARD.set_el(next_x, next_y, PLAYER)
+
 
         if existing_el:
             existing_el.interact(PLAYER)
