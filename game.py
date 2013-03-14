@@ -70,27 +70,22 @@ class OrangeGem(Gem):
         player.inventory.append(self)
         GAME_BOARD.draw_msg("You have a key to one of the doors. Find the door out and you're safe!")
         player.move(3, 3)
+
 class Door(GameElement):
     IMAGE = "DoorClosed"
     SOLID = True
       
-    def __init__(self, key=None):
+    def __init__(self, key):
+      GameElement.__init__(self)
       self.key = key
 
     def interact(self, player):
-        has_key = False
         for item in player.inventory:
             if item == self.key:
-              has_key = True
+                self.IMAGE = "DoorOpened"
+                self.SOLID = False
+                GAME_BOARD.draw_msg("You've gone through the correct door and are safe!")
 
-        if has_key:
-          self.IMAGE = "DoorOpened"
-          SOLID = False
-
-class LockedDoor(Door):
-    IMAGE = "DoorClosed"
-    SOLID = True
-                
 
 class Tree(GameElement):
     IMAGE = "TallTree"
@@ -103,8 +98,8 @@ def initialize():
     
     # The positions we're setting each rock to
     rock_positions = [
-        (2, 1), 
-        (1, 2),
+        (4, 3), 
+        (3, 4),
         (3, 2),
         (2, 3)
     ]
@@ -119,29 +114,23 @@ def initialize():
         rocks.append(rock)
     rocks[-1].SOLID = False
 
-    for rock in rocks:
-        print rock
-
     # Initialize and register the player Character
     global PLAYER
     PLAYER = Character()
     GAME_BOARD.register(PLAYER)
     GAME_BOARD.set_el(3, 3, PLAYER)
-    print PLAYER
 
-    # Initialize and register two enemy boys that will attack character
-    global PLAYER1
-    PLAYER1 = Enemy()
-    GAME_BOARD.register(PLAYER1)
-    GAME_BOARD.set_el(1, 1, PLAYER1)
-    
-    print PLAYER1
+    # # Initialize and register two enemy boys that will attack character
+    # global PLAYER1
+    # PLAYER1 = Enemy()
+    # GAME_BOARD.register(PLAYER1)
+    # GAME_BOARD.set_el(1, 1, PLAYER1)
 
-    global PLAYER2
-    PLAYER2 = Enemy()
-    GAME_BOARD.register(PLAYER2)
-    GAME_BOARD.set_el(4, 6, PLAYER2)
-    print PLAYER2 
+    # global PLAYER2
+    # PLAYER2 = Enemy()
+    # GAME_BOARD.register(PLAYER2)
+    # GAME_BOARD.set_el(4, 6, PLAYER2)
+    # print PLAYER2 
 
     GAME_BOARD.draw_msg("This is Alyssa and Dee's wicked awesome game.")
 
@@ -156,7 +145,7 @@ def initialize():
     GAME_BOARD.set_el(5, 4, orange_gem)
 
     tree_positions = [
-        (4, 3),
+        (2, 5),
         (5, 1),
         (6, 3),
         (2, 0)
@@ -164,15 +153,15 @@ def initialize():
 
     trees = []
 
-    door = Door(key=orange_gem)
-    GAME_BOARD.register(door)
-    GAME_BOARD.set_el(0, 0, door)
+    door_opens = Door(orange_gem)
+    GAME_BOARD.register(door_opens)
+    GAME_BOARD.set_el(0, 0, door_opens)
     
-    door1 = LockedDoor()
+    door1 = Door(None)
     GAME_BOARD.register(door1)
-    GAME_BOARD.set_el(3, 3, door1)
+    GAME_BOARD.set_el(3, 6, door1)
 
-    door2 = LockedDoor()
+    door2 = Door(None)
     GAME_BOARD.register(door2)
     GAME_BOARD.set_el(5, 5, door2)
 
@@ -201,31 +190,36 @@ def keyboard_handler():
 
   
     if direction:
-        next_enemy_location = PLAYER1.next_pos(direction)
-        next_enemy_x = next_enemy_location[0]
-        next_enemy_y = next_enemy_location[1]
-        PLAYER1.move(next_enemy_x, next_enemy_y)
+        # next_enemy_location = PLAYER1.next_pos(direction)
+        # next_enemy_x = next_enemy_location[0]
+        # next_enemy_y = next_enemy_location[1]
+        # PLAYER1.move(next_enemy_x, next_enemy_y)
 
         next_location = PLAYER.next_pos(direction)
         next_x = next_location[0]
         next_y = next_location[1]
-
-        is_out_of_bounds_x = False
-        if next_x == GAME_WIDTH or next_x == -1:
-            is_out_of_bounds_x = True
         
-        is_out_of_bounds_y = False
-        if next_y == GAME_HEIGHT or next_y == -1:
-            is_out_of_bounds_y = True
-
-    
-
+        if not (0 <= next_x < GAME_WIDTH):
+            GAME_BOARD.draw_msg("You can't cross into dark-lands, stay within the perimiter of our kingdom!")
+            PLAYER.move(3, 3)
+            print PLAYER
+            return
+        
+        if not (0 <= next_y < GAME_HEIGHT):
+            GAME_BOARD.draw_msg("You can't cross into dark-lands, stay within the perimiter of our kingdom!")
+            PLAYER.move(3, 3)
+            print PLAYER
+            return
 
         existing_el = GAME_BOARD.get_el(next_x, next_y)
-	if existing_el is None or not existing_el.SOLID:
-       	    GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
+	   
+        if existing_el is None or not existing_el.SOLID:
+            GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
             GAME_BOARD.set_el(next_x, next_y, PLAYER)
-
 
         if existing_el:
            existing_el.interact(PLAYER)
+
+    
+
+    
