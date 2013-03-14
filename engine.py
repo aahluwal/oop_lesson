@@ -44,8 +44,9 @@ def setup_images():
             "FancyBulbasaur": "Bulbasaur.png",
             "FancyPikachu": "FancyPikachu.png",
             "FancyCharmander": "Charmander.png",
-            "FancySquirtle:": "Squirtle.png"
-            
+            "FancySquirtle": "Squirtle.png",
+            "Pokeball": "Pokeball.png", 
+            "snorlax": "snorlax.png"
             }
 
     for k,v in filenames.items():
@@ -59,7 +60,7 @@ def setup_images():
     TILE_HEIGHT = i.height
 
 class Board(object):
-    def __init__(self, width = 3, height = 3):
+    def __init__(self, width = 10, height = 10):
         self.width = width
         self.height = height
 
