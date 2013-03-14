@@ -13,8 +13,8 @@ KEYBOARD = None
 PLAYER = None
 ######################
 
-GAME_WIDTH = 7
-GAME_HEIGHT = 7
+GAME_WIDTH = 9
+GAME_HEIGHT = 9
 
 #### Put class definitions here ####
 class Rock(GameElement):
@@ -238,9 +238,6 @@ def initialize():
     GAME_BOARD.register(snorlax)
     GAME_BOARD.set_el(0, 3, snorlax)
 
-             
-
-
     # Initialize and register a couple of trees
     for pos in tree_positions:
         tree = Tree()
@@ -279,7 +276,6 @@ def keyboard_handler():
         if not is_position_inbounds(next_x, next_y):
             GAME_BOARD.draw_msg("You can't cross into dark-lands, stay within the perimiter of our kingdom!")
             PLAYER.move(3, 3)
-            print PLAYER
             return
 
         existing_el = GAME_BOARD.get_el(next_x, next_y)
